@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SmartMoney AI</title>
+<style>
+:root{--bg:#0b0d10;--card:#14181d;--bd:#232a32;--tx:#e8edf2;--mu:#8a96a3;--ac:#2de2a6;--ac2:#22b8e0;--rd:#ff5d6c;--am:#ffb84d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f3f6f9;--card:#fff;--bd:#dde3ea;--tx:#141a21;--mu:#5d6a78;--ac:#0a9f72;--ac2:#0b87aa}}
+:root[data-theme="light"]{--bg:#f3f6f9;--card:#fff;--bd:#dde3ea;--tx:#141a21;--mu:#5d6a78;--ac:#0a9f72;--ac2:#0b87aa}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;min-height:100vh}
+nav{width:210px;padding:18px 12px;border-right:1px solid var(--bd);position:sticky;top:0;height:100vh;flex-shrink:0}
+.logo{font-weight:800;font-size:18px;padding:0 8px}.logo span{color:var(--ac)}.tag{font-size:11px;color:var(--mu);padding:0 8px 16px}
+nav button{display:block;width:100%;text-align:left;background:none;border:0;color:var(--mu);padding:10px 12px;border-radius:10px;font:inherit;cursor:pointer;margin-bottom:2px}
+nav button.on,nav button:hover{background:var(--card);color:var(--tx)}nav button.on{box-shadow:inset 3px 0 var(--ac)}
+main{flex:1;padding:22px;max-width:1100px;min-width:0}
+h2{margin:0 0 14px}h3{margin:0 0 10px;font-size:15px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;margin-bottom:14px}.grid .card{margin:0}
+.big{font-size:24px;font-weight:700}.mu{color:var(--mu);font-size:13px}.pos{color:var(--ac)}.neg{color:var(--rd)}
+input,select,button.b{background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:9px 11px;font:inherit;max-width:100%}
+button.b{cursor:pointer;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#04110d;font-weight:600;border:0}button.b.s{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:10px}.row label{display:flex;flex-direction:column;font-size:12px;color:var(--mu);gap:3px}
+.tx{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--bd);align-items:center}.tx:last-child{border:0}
+.bar{height:9px;background:var(--bg);border-radius:9px;overflow:hidden;margin:6px 0}.bar i{display:block;height:100%;border-radius:9px;transition:width .6s;background:var(--ac)}
+.empty{color:var(--mu);text-align:center;padding:24px}.warn{font-size:12px}
+.view{display:none}.view.on{display:block}
+.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.keys button{padding:14px 0;border-radius:12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit;font-size:16px;cursor:pointer}.keys .op{color:var(--ac)}.keys .eq{background:var(--ac);color:#04110d}
+#disp{font-size:28px;text-align:right;min-height:40px;word-break:break-all}#res{text-align:right;color:var(--mu);min-height:22px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.tabs button{padding:6px 12px;border-radius:20px;border:1px solid var(--bd);background:none;color:var(--mu);cursor:pointer;font:inherit}.tabs button.on{background:var(--ac);color:#04110d;border-color:var(--ac)}
+#chat{height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px}.m{padding:9px 13px;border-radius:14px;max-width:85%;white-space:pre-wrap}.m.u{align-self:flex-end;background:var(--ac);color:#04110d}.m.a{background:var(--bg);border:1px solid var(--bd)}
+.chip{font-size:12px;padding:5px 10px;border-radius:20px;border:1px solid var(--bd);background:none;color:var(--mu);cursor:pointer}
+canvas{max-height:260px}
+@media(max-width:760px){body{flex-direction:column}nav{width:100%;height:auto;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;overflow-x:auto;padding:8px;border:0;border-bottom:1px solid var(--bd);background:var(--bg)}.logo,.tag{display:none}nav button{width:auto;white-space:nowrap}main{padding:14px}}
+#cover{position:fixed;inset:0;z-index:99;display:flex;align-items:center;justify-content:center;padding:calc(24px + env(safe-area-inset-top,0px)) 24px 24px;text-align:center;overflow-y:auto;background:radial-gradient(circle at 20% 15%,rgba(45,226,166,.22),transparent 45%),radial-gradient(circle at 85% 85%,rgba(34,184,224,.22),transparent 45%),var(--bg);transition:opacity .5s}#cover.out{opacity:0;pointer-events:none}
+#cover .ch{max-width:640px;animation:rise .8s ease both}@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+#cover h1{font-size:clamp(40px,9vw,72px);margin:14px 0 6px;line-height:1.05;letter-spacing:-1px}#cover h1 span{background:linear-gradient(135deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.cb{display:inline-block;border:1px solid var(--bd);background:var(--card);padding:5px 14px;border-radius:30px;font-size:13px;color:var(--mu)}.ct{font-size:19px;color:var(--mu);margin:0 0 26px}
+.cf{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:28px}.cf div{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;font-size:14px}
+#cover .b{padding:13px 34px;font-size:17px;border-radius:30px;box-shadow:0 8px 30px rgba(45,226,166,.3)}.dots::after{content:'';animation:dt 1.2s steps(4) infinite}@keyframes dt{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+</style></head><body>
+<div id="cover"><div class="ch"><div class="cb">💸 Personal finance, reimagined</div><h1>Smart<span>Money</span> AI</h1><p class="ct">Understand your money. Control your future.</p>
+<div class="cf"><div>📊 Track income &amp; expenses</div><div>🎯 Smart monthly budgets</div><div>🧮 Pro calculators: EMI, GST &amp; more</div><div>🤖 Ask the AI anything</div></div>
+<div id="cstart"><button class="b" id="cgo" onclick="S.profile?enter():cstep()">Get started →</button><div><button class="chip" id="cedit" hidden onclick="editProf()" style="margin-top:12px">Edit my details</button></div><div class="mu" style="margin-top:14px">Your financial data stays in this browser.</div></div>
+<style>#cform{text-align:left;background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:20px;max-width:420px;margin:0 auto}#cform label{display:flex;flex-direction:column;font-size:12px;color:var(--mu);gap:3px;margin-bottom:10px}#cform input,#cform select{width:100%}#cform label.chk{flex-direction:row;align-items:center;gap:8px;font-size:13px}#cform label.chk input{width:auto}#p_o{margin:-4px 0 10px}</style>
+<form id="cform" hidden onsubmit="return saveProf(event)"><h3 style="font-size:19px">Tell us about you</h3><p class="mu" style="margin:0 0 12px">Takes 20 seconds. Used to personalise your dashboard.</p>
+<label>Your name<input id="p_n" required maxlength="40" placeholder="e.g. Aarav"></label>
+<label>Your profession / occupation<input id="p_p" list="plist" required maxlength="50" autocomplete="off" placeholder="Pick from the list or type your own"></label><datalist id="plist"></datalist>
+<label>Monthly income (₹)<input id="p_i" type="number" min="0" step="1" required placeholder="e.g. 30000"></label>
+<label id="p_x1" class="chk"><input type="checkbox" id="p_a" checked> Add this as my income for this month</label>
+<label id="p_x2" class="chk"><input type="checkbox" id="p_b" checked> Set a starting budget (70% of income)</label>
+<button class="b" style="width:100%;margin-top:6px">Continue →</button></form></div></div>
+<nav><div class="logo">Smart<span>Money</span> AI</div><div class="tag">Understand your money. Control your future.</div>
+<button data-v="dash" class="on">Dashboard</button><button data-v="txs">Transactions</button><button data-v="bud">Budgets</button><button data-v="calc">Calculator</button><button data-v="ai">AI Assistant</button><button data-v="set">Settings</button></nav>
+<main>
+<section class="view on" id="dash"><h2>Dashboard</h2><div class="mu" id="pinfo" style="margin:-8px 0 12px"></div>
+<div class="grid" id="kpis"></div><div class="row" style="margin:14px 0"><button class="b" onclick="go('txs',1)">+ Add Income</button><button class="b" onclick="go('txs',2)">+ Add Expense</button><button class="b s" onclick="go('calc')">Open Calculator</button><button class="b s" onclick="go('ai')">Ask AI</button></div>
+<div class="grid g2"><div class="card"><h3>Spending by category (this month)</h3><canvas id="c1"></canvas><div id="e1" class="empty" hidden>No expenses this month yet.</div></div>
+<div class="card"><h3>Income vs expenses (6 months)</h3><canvas id="c2"></canvas></div></div>
+<div class="card" style="margin-top:14px"><h3>Recent transactions</h3><div id="recent"></div></div></section>
+
+<section class="view" id="txs"><h2>Transactions</h2>
+<form class="card" id="tf" onsubmit="return addTx(event)"><div class="row">
+<label>Title<input id="t_t" required maxlength="60"></label><label>Amount (₹)<input id="t_a" type="number" step="0.01" min="0.01" required></label>
+<label>Type<select id="t_y" onchange="fillCats()"><option value="expense">Expense</option><option value="income">Income</option></select></label>
+<label>Category<select id="t_c"></select></label><label>Date<input id="t_d" type="date" required></label>
+<label>Payment<select id="t_m"><option>UPI</option><option>Cash</option><option>Debit card</option><option>Credit card</option><option>Bank transfer</option><option>Other</option></select></label>
+<button class="b" id="t_b">Add</button><button type="button" class="b s" id="t_x" hidden onclick="resetForm()">Cancel</button></div>
+<div class="row"><label>New category<input id="nc" maxlength="20" placeholder="e.g. Pets"></label><button type="button" class="b s" onclick="addCat()">Add category</button></div></form>
+<div class="card"><div class="row"><label>Search<input id="q" oninput="renderTx()"></label><label>Type<select id="fy" onchange="renderTx()"><option value="">All</option><option>income</option><option>expense</option></select></label>
+<label>Category<select id="fc" onchange="renderTx()"></select></label><label>Sort<select id="so" onchange="renderTx()"><option value="n">Newest</option><option value="o">Oldest</option><option value="h">Highest</option><option value="l">Lowest</option></select></label>
+<button class="b s" onclick="csv()">Export CSV</button></div><div id="list"></div></div></section>
+
+<section class="view" id="bud"><h2>Monthly Budgets</h2><div class="card"><div class="row"><label>Overall monthly limit (₹)<input id="bo" type="number" min="0"></label><button class="b" onclick="saveBud()">Save budgets</button><button class="b s" onclick="resetBud()">Reset</button></div>
+<div class="row" id="bcats"></div></div><div class="card"><h3>Progress this month</h3><div id="bprog"></div></div><div class="card"><h3>vs previous month</h3><div id="bcmp"></div></div></section>
+
+<section class="view" id="calc"><h2>Calculator</h2><div class="tabs" id="ctabs"></div>
+<div class="grid g2"><div class="card" id="std"><div id="disp">0</div><div id="res"></div><div class="keys" id="keys"></div>
+<div class="row" style="margin-top:10px"><button class="b s" onclick="copyRes()">Copy result</button><span class="mu" id="mem"></span></div></div>
+<div class="card" id="tool" hidden></div><div class="card"><h3>History</h3><div id="hist"></div><button class="b s" onclick="S.hist=[];save();renderHist()">Clear history</button></div></div></section>
+
+<section class="view" id="ai"><h2>AI Assistant</h2><div class="card"><div class="mu" style="margin-bottom:8px">Ask me anything: finance, study, tech, daily life. Questions about <b>your own</b> money ("my spending") are calculated in your browser and never sent anywhere. I have no live web access.</div><label class="mu" style="display:block;margin-bottom:8px"><input type="checkbox" id="ai_share"> Allow sharing my profession, stated income, monthly totals &amp; category summary (never my name) with the AI for personalised advice (individual transactions are never sent)</label>
+<div id="chat"></div><div class="row" style="margin-top:10px" id="chips"></div>
+<div class="row"><input id="ai_q" style="flex:1;min-width:200px" placeholder="Ask about your money…" onkeydown="if(event.key==='Enter')ask()"><button class="b" onclick="ask()">Send</button><button class="b s" onclick="clearChat()">Clear</button></div></div></section>
+
+<section class="view" id="set"><h2>Settings &amp; Data</h2><div class="card"><div class="row"><button class="b s" onclick="toggleTheme()">Toggle light/dark</button><button class="b s" onclick="editProf()">Edit profile</button><button class="b s" onclick="demo()">Load demo data</button><button class="b s" onclick="csv()">Export CSV</button><button class="b s" style="color:var(--rd)" onclick="wipe()">Delete all data</button></div>
+<p class="mu">Your data is stored in this browser only (localStorage). It is not synced across devices and is lost if you clear browser data. Cloud sync would need a backend with accounts. Currency is ₹ (INR). Demo data is labelled "[Demo]".</p></div></section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+let S=null;try{S=JSON.parse(localStorage.getItem('smai'))}catch(e){}
+S=S||{tx:[],bud:{o:0,c:{}},hist:[],cx:[],chat:[]};S.cx=S.cx||[];S.chat=S.chat||[];
+const save=()=>{try{localStorage.setItem('smai',JSON.stringify(S))}catch(e){}};
+const EXP=['Food','Shopping','Transport','Education','Bills','Entertainment','Health','Rent','Subscriptions','Travel','Other'],INC=['Salary','Pocket Money','Freelancing','Business','Gifts','Interest','Other'];
+const cats=t=>t=='income'?INC:EXP.concat(S.cx.filter(c=>!EXP.includes(c)));
+const fmt=n=>'₹'+Number(n).toLocaleString('en-IN',{maximumFractionDigits:2});
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const ym=o=>{const d=new Date();d.setDate(1);d.setMonth(d.getMonth()+o);return iso(d).slice(0,7)};
+const mtx=(o,t)=>S.tx.filter(x=>x.d.startsWith(ym(o))&&(!t||x.y==t));
+const sum=a=>a.reduce((s,x)=>s+x.a,0);
+const bycat=a=>{const m={};a.forEach(x=>m[x.c]=(m[x.c]||0)+x.a);return m};
+const daysLeft=()=>{const n=new Date();return new Date(n.getFullYear(),n.getMonth()+1,0).getDate()-n.getDate()+1};
+function go(v,t){$$('.view').forEach(e=>e.classList.toggle('on',e.id==v));$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v==v));if(t){$('#t_y').value=t==1?'income':'expense';fillCats();$('#t_t').focus()}render()}
+$$('nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
+function toggleTheme(){const r=document.documentElement,dark=getComputedStyle(r).getPropertyValue('--bg').trim()=='#0b0d10';r.dataset.theme=dark?'light':'dark';render()}
+let ch={};function chart(id,cfg){if(typeof Chart=='undefined')return;if(ch[id])ch[id].destroy();Chart.defaults.color=getComputedStyle(document.documentElement).getPropertyValue('--mu');ch[id]=new Chart($(id),cfg)}
+function render(){dash();renderTx();bud();renderHist();fillFilter()}
+function dash(){const inc=sum(mtx(0,'income')),exp=sum(mtx(0,'expense')),bal=sum(S.tx.filter(x=>x.y=='income'))-sum(S.tx.filter(x=>x.y=='expense')),rem=S.bud.o?S.bud.o-exp:null,sv=inc-exp;
+const k=(l,v,c)=>`<div class="card"><div class="mu">${l}</div><div class="big ${c||''}">${v}</div></div>`;
+$('#kpis').innerHTML=k('Total balance',fmt(bal))+k('Income this month',fmt(inc),'pos')+k('Expenses this month',fmt(exp),'neg')+k('Budget remaining',rem===null?'Set a budget':fmt(rem),rem<0?'neg':'')+k('Savings',fmt(sv)+` <span class="mu">${inc?(sv/inc*100).toFixed(1):0}%</span>`,sv<0?'neg':'pos');
+const c=bycat(mtx(0,'expense')),ks=Object.keys(c);$('#c1').hidden=!ks.length;$('#e1').hidden=!!ks.length;
+if(ks.length)chart('#c1',{type:'doughnut',data:{labels:ks,datasets:[{data:ks.map(x=>c[x]),backgroundColor:['#2de2a6','#22b8e0','#ffb84d','#ff5d6c','#a78bfa','#f472b6','#84cc16','#fb923c','#38bdf8','#e879f9','#94a3b8']}]}});
+const L=[],I=[],E=[];for(let o=-5;o<=0;o++){L.push(ym(o));I.push(sum(mtx(o,'income')));E.push(sum(mtx(o,'expense')))}
+chart('#c2',{type:'bar',data:{labels:L,datasets:[{label:'Income',data:I,backgroundColor:'#2de2a6'},{label:'Expenses',data:E,backgroundColor:'#ff5d6c'}]}});
+$('#recent').innerHTML=S.tx.length?[...S.tx].sort((a,b)=>b.d.localeCompare(a.d)).slice(0,5).map(row).join(''):'<div class="empty">No transactions yet. Add one or load demo data in Settings.</div>'}
+const row=(x,act)=>`<div class="tx"><div><b>${esc(x.t)}</b><div class="mu">${esc(x.c)} · ${x.d} · ${esc(x.m)}</div></div><div style="text-align:right"><b class="${x.y=='income'?'pos':'neg'}">${x.y=='income'?'+':'−'}${fmt(x.a)}</b>${act?`<div><button class="chip" onclick="editTx('${x.id}')">Edit</button> <button class="chip" onclick="delTx('${x.id}')">Delete</button></div>`:''}</div></div>`;
+let editId=null;
+function fillCats(){const t=$('#t_y').value,v=$('#t_c').value;$('#t_c').innerHTML=cats(t).map(c=>`<option>${esc(c)}</option>`).join('');if(cats(t).includes(v))$('#t_c').value=v}
+function fillFilter(){const v=$('#fc').value;$('#fc').innerHTML='<option value="">All</option>'+[...new Set(EXP.concat(INC,S.cx))].map(c=>`<option>${esc(c)}</option>`).join('');$('#fc').value=v}
+function addCat(){const n=$('#nc').value.trim();if(!n)return;if(!S.cx.includes(n)&&!EXP.includes(n)){S.cx.push(n);save()}$('#nc').value='';$('#t_y').value='expense';fillCats();$('#t_c').value=n;fillFilter();bud()}
+function addTx(e){e.preventDefault();const a=parseFloat($('#t_a').value);if(!(a>0)||!$('#t_d').value)return false;
+const o={id:editId||Date.now()+''+Math.random().toString(36).slice(2,6),t:$('#t_t').value.trim(),a:Math.round(a*100)/100,y:$('#t_y').value,c:$('#t_c').value,d:$('#t_d').value,m:$('#t_m').value};
+if(editId)S.tx=S.tx.map(x=>x.id==editId?o:x);else S.tx.push(o);save();resetForm();render();return false}
+function resetForm(){editId=null;$('#tf').reset();$('#t_d').value=iso(new Date());fillCats();$('#t_b').textContent='Add';$('#t_x').hidden=true}
+function editTx(id){const x=S.tx.find(v=>v.id==id);editId=id;$('#t_t').value=x.t;$('#t_a').value=x.a;$('#t_y').value=x.y;fillCats();$('#t_c').value=x.c;$('#t_d').value=x.d;$('#t_m').value=x.m;$('#t_b').textContent='Save';$('#t_x').hidden=false;scrollTo(0,0)}
+function delTx(id){if(confirm('Delete this transaction?')){S.tx=S.tx.filter(x=>x.id!=id);save();render()}}
+function renderTx(){const q=$('#q').value.toLowerCase(),y=$('#fy').value,c=$('#fc').value,s=$('#so').value;let a=S.tx.filter(x=>(!q||x.t.toLowerCase().includes(q))&&(!y||x.y==y)&&(!c||x.c==c));
+a.sort((p,r)=>s=='o'?p.d.localeCompare(r.d):s=='h'?r.a-p.a:s=='l'?p.a-r.a:r.d.localeCompare(p.d));
+$('#list').innerHTML=a.length?a.slice(0,100).map(x=>row(x,1)).join('')+(a.length>100?`<div class="mu">Showing 100 of ${a.length}. Use filters to narrow.</div>`:''):'<div class="empty">No matching transactions.</div>'}
+function csv(){const r=[['Title','Amount','Type','Category','Date','Payment']].concat(S.tx.map(x=>[x.t,x.a,x.y,x.c,x.d,x.m]));
+const t=r.map(l=>l.map(v=>{v=String(v);if(/^[=+\-@]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"'}).join(',')).join('\n');
+const u=URL.createObjectURL(new Blob([t],{type:'text/csv'})),a=document.createElement('a');a.href=u;a.download='smartmoney.csv';a.click()}
+function bud(){$('#bo').value=S.bud.o||'';$('#bcats').innerHTML=cats('expense').map(c=>`<label>${esc(c)}<input class="bc" data-c="${esc(c)}" type="number" min="0" value="${S.bud.c[c]||''}" style="width:110px"></label>`).join('');
+const e=mtx(0,'expense'),by=bycat(e),spent=sum(e);let items=[];if(S.bud.o)items.push(['Overall',spent,S.bud.o]);Object.keys(S.bud.c).forEach(c=>S.bud.c[c]>0&&items.push([c,by[c]||0,S.bud.c[c]]));
+$('#bprog').innerHTML=items.length?items.map(([n,s,l])=>{const p=s/l*100,col=p>=100?'var(--rd)':p>=90?'#ff8a4d':p>=75?'var(--am)':'var(--ac)',w=p>=100?'🚨 Budget exceeded':p>=90?'⚠️ Over 90% used':p>=75?'⚠️ 75% used':'';
+return `<div><b>${esc(n)}</b> <span class="mu">${fmt(s)} of ${fmt(l)} · ${fmt(Math.max(l-s,0))} left</span><div class="bar"><i style="width:${Math.min(p,100)}%;background:${col}"></i></div><div class="warn" style="color:${col}">${w}</div></div>`}).join(''):'<div class="empty">Set a budget above to track progress.</div>';
+const pv=bycat(mtx(-1,'expense')),all=[...new Set(Object.keys(by).concat(Object.keys(pv)))];
+$('#bcmp').innerHTML=all.length?all.map(c=>{const a=by[c]||0,b=pv[c]||0,d=a-b;return `<div class="tx"><span>${esc(c)}</span><span>${fmt(a)} <span class="mu">vs ${fmt(b)}</span> <b class="${d>0?'neg':'pos'}">${d>0?'▲':'▼'} ${fmt(Math.abs(d))}</b></span></div>`}).join('')+tips(by,pv):'<div class="empty">Not enough data to compare.</div>'}
+function tips(by,pv){const up=Object.keys(by).filter(c=>c!='Rent'&&c!='Bills'&&by[c]>(pv[c]||0)*1.2&&by[c]>0).sort((a,b)=>by[b]-by[a]).slice(0,2);return up.length?`<div class="mu" style="margin-top:8px">💡 Spending rose most in <b>${up.map(esc).join('</b> and <b>')}</b>. These are discretionary, so consider trimming them.</div>`:''}
+function saveBud(){S.bud.o=parseFloat($('#bo').value)||0;S.bud.c={};$$('.bc').forEach(i=>{const v=parseFloat(i.value);if(v>0)S.bud.c[i.dataset.c]=v});save();render()}
+function resetBud(){if(confirm('Reset all budgets?')){S.bud={o:0,c:{}};save();render()}}
+function demo(){const d=new Date(),mk=[];const add=(o,day,t,a,y,c,m)=>{const x=new Date(d.getFullYear(),d.getMonth()+o,day);mk.push({id:'demo'+mk.length+Math.random().toString(36).slice(2,5),t:'[Demo] '+t,a,y,c,d:iso(x),m})};
+for(let o=-2;o<=0;o++){add(o,1,'Salary',50000,'income','Salary','Bank transfer');add(o,2,'Rent',15000,'expense','Rent','Bank transfer');add(o,5,'Groceries',3200+o*300,'expense','Food','UPI');add(o,9,'Dinner out',1800,'expense','Food','Credit card');add(o,12,'Metro & cabs',1400,'expense','Transport','UPI');add(o,15,'Shopping',4500+(o+2)*900,'expense','Shopping','Debit card');add(o,18,'Electricity',2100,'expense','Bills','UPI');add(o,20,'Streaming',649,'expense','Subscriptions','Credit card')}
+S.tx=S.tx.filter(x=>!x.id.startsWith('demo')).concat(mk);if(!S.bud.o){S.bud={o:35000,c:{Food:7000,Shopping:5000,Transport:2500}}}save();render();go('dash')}
+function wipe(){if(confirm('Delete ALL data permanently?')){S={tx:[],bud:{o:0,c:{}},hist:[],cx:[],chat:[]};save();resetForm();render();chatInit();greet()}}
+/* Calculator: recursive-descent parser, no eval */
+function evalExp(s){const t=s.match(/\d*\.?\d+|[+\-*/()%]/g)||[];if(t.join('')!=s.replace(/\s/g,''))throw Error('Invalid input');let i=0;
+const ex=()=>{let v=tm();while(t[i]=='+'||t[i]=='-'){const o=t[i++],r=tm();v=o=='+'?v+r:v-r}return v},
+tm=()=>{let v=un();while(t[i]=='*'||t[i]=='/'){const o=t[i++],r=un();if(o=='/'){if(r==0)throw Error('Cannot divide by zero');v/=r}else v*=r}return v},
+un=()=>{if(t[i]=='-'){i++;return -un()}if(t[i]=='+'){i++;return un()}let v=pr();while(t[i]=='%'){i++;v/=100}return v},
+pr=()=>{if(t[i]=='('){i++;const v=ex();if(t[i++]!=')')throw Error('Missing )');return v}const x=parseFloat(t[i++]);if(isNaN(x))throw Error('Invalid input');return x};
+if(!t.length)return 0;const v=ex();if(i<t.length)throw Error('Invalid input');return parseFloat(v.toPrecision(12))}
+let cx='',mem=0,last='';const disp=()=>{$('#disp').textContent=(cx||'0').replace(/\*/g,'×').replace(/\//g,'÷');try{$('#res').textContent=cx&&/[\d)%]$/.test(cx)&&/[+\-*/%(]/.test(cx.slice(1))?'= '+evalExp(cx):''}catch(e){$('#res').textContent=''}};
+function key(k){if(k=='C')cx='';else if(k=='CE')cx=cx.replace(/\d*\.?\d*$/,'');else if(k=='⌫')cx=cx.slice(0,-1);else if(k=='=')return eq();
+else if(k=='±')cx=cx.startsWith('-(')&&cx.endsWith(')')?cx.slice(2,-1):cx?'-('+cx+')':'';
+else if(k=='MC')mem=0;else if(k=='MR')cx+=mem;else if(k=='M+'||k=='M−'){try{const v=evalExp(cx||'0');mem+=k=='M+'?v:-v}catch(e){}}
+else cx+=k;$('#mem').textContent=mem?'M = '+mem:'';disp()}
+function eq(){try{const r=evalExp(cx);if(cx){S.hist.unshift({e:cx,r});S.hist=S.hist.slice(0,30);save();renderHist()}last=String(r);cx=String(r);$('#res').textContent='';$('#disp').textContent=last}catch(e){$('#res').textContent=e.message}}
+['MC','MR','M+','M−','C','CE','⌫','(',')','7','8','9','/','4','5','6','*','1','2','3','-','±','0','.','+','%','=' ].forEach(k=>{const b=document.createElement('button');b.textContent=k=='/'?'÷':k=='*'?'×':k;if('/*-+%'.includes(k)||k.startsWith('M'))b.className='op';if(k=='=')b.className='eq';b.onclick=()=>key(k);$('#keys').appendChild(b)});
+document.addEventListener('keydown',e=>{if(!$('#calc').classList.contains('on')||['INPUT','SELECT'].includes(e.target.tagName))return;
+if(/^[0-9.+\-*/()%]$/.test(e.key))key(e.key);else if(e.key=='Enter'){e.preventDefault();key('=')}else if(e.key=='Backspace')key('⌫');else if(e.key=='Escape')key('C')});
+function copyRes(){const v=last||$('#res').textContent.replace('= ','');try{navigator.clipboard.writeText(v)}catch(e){}}
+function renderHist(){$('#hist').innerHTML=S.hist.length?S.hist.map(h=>`<div class="tx"><span class="mu">${esc(h.e)}</span><b>${h.r}</b></div>`).join(''):'<div class="empty">No calculations yet.</div>'}
+/* Financial tools */
+const P=(x,d=2)=>Number(x).toFixed(d);
+const TOOLS={Standard:null,
+Percentage:{f:[['p','Percent %',10],['a','Amount',1000],['x','Old value',100],['y','New value',120]],r:v=>`${v.p}% of ${fmt(v.a)} = <b>${fmt(v.p*v.a/100)}</b><br>Change from ${v.x} to ${v.y}: <b>${P((v.y-v.x)/v.x*100)}%</b><br>${v.x} is <b>${P(v.x/v.y*100)}%</b> of ${v.y}`,chk:v=>v.x==0||v.y==0?'Old and new values must be non-zero':''},
+Discount:{f:[['p','Original price',2000],['d','Discount %',25]],r:v=>`Discount: <b>${fmt(v.p*v.d/100)}</b><br>Final price: <b>${fmt(v.p-v.p*v.d/100)}</b><br><span class="mu">${v.p} − (${v.p} × ${v.d}%)</span>`,chk:v=>v.d>100?'Discount cannot exceed 100%':''},
+GST:{f:[['a','Amount',1000],['g','GST %',18]],r:v=>{const g=v.a*v.g/100,inc=v.a+g,base=v.a/(1+v.g/100);return `<b>Add GST:</b> GST ${fmt(g)} (CGST ${fmt(g/2)} + SGST ${fmt(g/2)}), total <b>${fmt(inc)}</b><br><b>Treat amount as GST-inclusive:</b> original ${fmt(base)}, GST ${fmt(v.a-base)}<br><span class="mu">CGST/SGST split applies to intra-state sales only.</span>`}},
+Savings:{f:[['i','Initial savings',10000],['m','Monthly contribution',2000],['n','Months',24],['r','Annual interest % (assumed)',6]],r:v=>{const q=v.r/1200,n=v.n,fv=q?v.i*(1+q)**n+v.m*((1+q)**n-1)/q:v.i+v.m*n,c=v.i+v.m*n;return `Total contributions: <b>${fmt(c)}</b><br>Estimated interest: <b>${fmt(fv-c)}</b><br>Estimated balance: <b>${fmt(fv)}</b><br><span class="mu">Assumes monthly compounding at a constant rate. Real returns vary and are not guaranteed.</span>`}},
+EMI:{f:[['p','Loan amount',500000],['r','Annual interest %',9],['n','Tenure (months)',60]],r:v=>{const q=v.r/1200,e=q?v.p*q*(1+q)**v.n/((1+q)**v.n-1):v.p/v.n;return `Monthly EMI: <b>${fmt(e)}</b><br>Total interest: <b>${fmt(e*v.n-v.p)}</b><br>Total repayment: <b>${fmt(e*v.n)}</b><br><span class="mu">EMI = P·r·(1+r)ⁿ / ((1+r)ⁿ − 1), r = annual rate ÷ 12</span>`},chk:v=>v.n<1?'Tenure must be at least 1 month':''},
+Split:{f:[['t','Total bill',2400],['n','People',4],['k','Tip %',10]],r:v=>{const tot=v.t*(1+v.k/100);return `Total with tip: <b>${fmt(tot)}</b><br>Per person: <b>${fmt(tot/v.n)}</b>`},chk:v=>v.n<1?'Need at least 1 person':''},
+Daily:{f:[['b','Remaining budget',Math.max((S.bud.o||0)-sum(mtx(0,'expense')),0)],['d','Days remaining',daysLeft()]],r:v=>`Suggested daily limit: <b>${fmt(v.b/v.d)}</b>`,chk:v=>v.d<1?'Days must be at least 1':''}};
+let cur='Standard';
+function tabs(){$('#ctabs').innerHTML=Object.keys(TOOLS).map(k=>`<button class="${k==cur?'on':''}" onclick="cur='${k}';tabs()">${k}</button>`).join('');const T=TOOLS[cur];$('#std').hidden=!!T;$('#tool').hidden=!T;if(!T)return;
+$('#tool').innerHTML=`<h3>${cur}</h3><div class="row">${T.f.map(f=>`<label>${f[1]}<input class="ti" data-k="${f[0]}" type="number" step="any" value="${f[2]}" oninput="runTool()"></label>`).join('')}</div><div id="tout"></div>`;runTool()}
+function runTool(){const T=TOOLS[cur],v={};let bad=false;$$('.ti').forEach(i=>{const n=parseFloat(i.value);v[i.dataset.k]=n;if(isNaN(n)||n<0)bad=true});
+$('#tout').innerHTML=bad?'<span class="neg">Enter valid, non-negative numbers.</span>':(T.chk&&T.chk(v))?`<span class="neg">${T.chk(v)}</span>`:T.r(v)}
+/* Assistant: real calculations from saved data */
+const SUG=['Explain SIPs for a beginner','What is inflation?','Tips to save money as a student','Where did most of my money go this month?','Compare my expenses with last month','How much can I spend per day this month?'];
+function chatInit(){$('#chips').innerHTML=SUG.map(s=>`<button class="chip" onclick="$('#ai_q').value=this.textContent;ask()">${esc(s)}</button>`).join('');drawChat()}
+function drawChat(){$('#chat').innerHTML=S.chat.length?S.chat.map(m=>`<div class="m ${m.r}">${m.t?md(m.t):'<span class="dots">Thinking</span>'}</div>`).join(''):'<div class="m a">Hi! I am SmartMoney AI. Ask me anything, from "What is compound interest?" to "Where did my money go this month?"</div>';$('#chat').scrollTop=1e9}
+function clearChat(){S.chat=[];save();drawChat()}
+function answer(q){const l=q.toLowerCase(),e=mtx(0,'expense'),by=bycat(e),spent=sum(e),inc=sum(mtx(0,'income')),need=()=>S.tx.length?null:'You have no transactions yet. Add some (or load demo data in Settings) first.';
+const personal=/(spen|spent|expens|income|budget|month|category|money go|per day|daily)/.test(l);
+if(!personal)return 'I can answer questions about your own finances from saved data. General questions ("What is inflation?") need a backend AI service, which is not connected in this prototype, so I won\'t guess. The Calculator tab covers EMI, GST, savings and more.';
+if(need())return need();
+const c=Object.keys(by).concat(S.cx).find(c=>l.includes(c.toLowerCase()));if(c&&/(how much|spen|spent)/.test(l))return `You spent ${fmt(by[c]||0)} on ${c} this month.`;
+if(/compare|last month|previous/.test(l)){const p=sum(mtx(-1,'expense')),d=spent-p;return `This month: ${fmt(spent)}\nLast month: ${fmt(p)}\nChange: ${d>=0?'+':'−'}${fmt(Math.abs(d))}${p?` (${P(Math.abs(d)/p*100,1)}%)`:''}`}
+if(/exceed|over|budget/.test(l)&&!/per day|daily/.test(l)){const o=Object.keys(S.bud.c).filter(k=>(by[k]||0)>S.bud.c[k]).map(k=>`${k}: ${fmt(by[k])} of ${fmt(S.bud.c[k])}`);if(S.bud.o&&spent>S.bud.o)o.unshift(`Overall: ${fmt(spent)} of ${fmt(S.bud.o)}`);if(!S.bud.o&&!Object.keys(S.bud.c).length)return 'No budgets are set yet. Set them on the Budgets tab.';return o.length?'Over budget:\n'+o.join('\n'):'Nothing is over budget this month.'}
+if(/per day|daily/.test(l)){if(!S.bud.o)return 'Set an overall monthly budget first.';const r=S.bud.o-spent,d=daysLeft();return r<=0?`You have used your full budget (${fmt(spent)} of ${fmt(S.bud.o)}).`:`Remaining budget ${fmt(r)} ÷ ${d} days left = ${fmt(r/d)} per day.`}
+if(/percent|%/.test(l)){return inc?`You spent ${fmt(spent)} of ${fmt(inc)} income = ${P(spent/inc*100,1)}% this month.`:'No income recorded this month.'}
+if(/most|where|top|highest/.test(l)){const k=Object.keys(by).sort((a,b)=>by[b]-by[a]);return k.length?'Top spending this month:\n'+k.slice(0,3).map((x,i)=>`${i+1}. ${x}: ${fmt(by[x])} (${P(by[x]/spent*100,1)}%)`).join('\n'):'No expenses recorded this month.'}
+return 'Try asking about a category ("How much did I spend on food?"), comparisons, budgets, daily limits or the percentage of income spent.'}
+function enter(){const c=$('#cover');c.classList.add('out');setTimeout(()=>{if(c.classList.contains('out'))c.style.display='none'},500)}
+const PROF={'Student':['School student','College / University student','Competitive exam aspirant','Research scholar / PhD','Trainee / Apprentice'],
+'Job / Salaried':['Software / IT professional','Teacher / Professor','Doctor / Nurse / Healthcare worker','Engineer (non-IT)','Government employee','Banking / Finance professional','Accountant / CA','Lawyer / Legal professional','Marketing / Sales professional','HR / Admin / Office staff','Designer / Creative professional','Police / Army / Defence','Driver / Delivery partner','Factory / Skilled worker','Electrician / Plumber / Technician','Retail / Hospitality staff','Security guard / Support staff','Pilot / Airline / Railway staff','Other salaried job'],
+'Business & Trade':['Shop / Store owner','Startup founder','Manufacturer','Trader / Wholesaler','Restaurant / Cafe owner','Franchise owner','Contractor / Builder','Real estate agent','Transport / Logistics owner','Other business'],
+'Freelancer & Self-employed':['Freelancer','Content creator / Influencer','Consultant','Photographer / Videographer','Artist / Musician / Performer','Private tutor / Coach','Gig worker','Other self-employed'],
+'Farming & Rural':['Farmer','Dairy / Poultry / Animal farming','Fisherman'],
+'Home & Retired':['Homemaker','Retired / Pensioner'],
+'Other':['Looking for work','Between jobs']};
+function profInit(){$('#plist').innerHTML=Object.values(PROF).flat().map(x=>`<option value="${x}"></option>`).join('')}
+function cstep(){$('#cstart').hidden=true;$('#cform').hidden=false;$('#p_n').focus()}
+function editProf(){const p=S.profile,c=$('#cover');c.style.display='flex';requestAnimationFrame(()=>c.classList.remove('out'));cstep();
+if(p){$('#p_n').value=p.name;$('#p_i').value=p.inc;$('#p_p').value=p.prof}
+$('#p_x1').hidden=$('#p_x2').hidden=!!p}
+function saveProf(e){e.preventDefault();const n=$('#p_n').value.trim(),sel=$('#p_p'),inc=parseFloat($('#p_i').value);if(!n||!sel.value||!(inc>=0))return false;
+const pr=sel.value.trim().slice(0,50),grp=(Object.entries(PROF).find(([g,a])=>a.some(x=>x.toLowerCase()===pr.toLowerCase()))||[/student|school|college/i.test(pr)?'Student':/business|owner|shop|trader|founder/i.test(pr)?'Business':/freelanc|creator|consultant|tutor|artist/i.test(pr)?'Freelancer':''])[0];if(!pr)return false;
+if(!S.profile){const ic=/Student/.test(grp)?'Pocket Money':/Business/.test(grp)?'Business':/Freelancer/.test(grp)?'Freelancing':'Salary';
+if($('#p_a').checked&&inc>0)S.tx.push({id:Date.now()+'p',t:'Monthly income',a:inc,y:'income',c:ic,d:iso(new Date()),m:'Bank transfer'});
+if($('#p_b').checked&&inc>0&&!S.bud.o)S.bud.o=Math.round(inc*0.7)}
+S.profile={name:n.slice(0,40),prof:pr.slice(0,50),inc};save();render();greet();enter();return false}
+function greet(){const p=S.profile;$('#dash h2').textContent=p?'Hi, '+p.name+' 👋':'Dashboard';$('#pinfo').textContent=p?p.prof+' · Monthly income '+fmt(p.inc):'';$('#cgo').textContent=p?'Welcome back, '+p.name+' →':'Get started →';$('#cedit').hidden=!p}
+const md=t=>esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^#{1,4}\s*(.+)$/gm,'<b>$1</b>').replace(/^[-*]\s+/gm,'• ');
+const SYS="You are SmartMoney AI Assistant inside a personal finance app used mainly in India. Answer any question helpfully, accurately and in simple language, using short headings or bullet lists when useful. Use ₹ for money. For finance topics give educational information only and never guarantee returns. You have no live web access, so say so if asked for real-time data. Never invent the user's transactions; use only data provided below.";
+function summary(){const e=mtx(0,'expense');return `[User's finance summary for this month, shared with permission] Profession: ${S.profile?S.profile.prof:'unknown'}, stated monthly income: ${S.profile?S.profile.inc:'unknown'}. Income ${sum(mtx(0,'income'))}, expenses ${sum(e)}, last month's expenses ${sum(mtx(-1,'expense'))}. Spending by category: ${JSON.stringify(bycat(e))}. Budgets: overall ${S.bud.o||'none'}, per category ${JSON.stringify(S.bud.c)}. Days left in month: ${daysLeft()}.`}
+let busy=false;
+async function ask(){const q=$('#ai_q').value.trim();if(!q||busy)return;$('#ai_q').value='';S.chat.push({r:'u',t:q.slice(0,2000)});
+const mine=/\b(my|i|me|mine)\b/i.test(q)&&/(spen|spent|expens|income|budget|month|category|money go|per day|daily)/i.test(q);const loc=mine?answer(q):null;
+if(loc&&!/^(I can answer|Try asking)/.test(loc)){S.chat.push({r:'a',t:loc});S.chat=S.chat.slice(-40);save();drawChat();return}
+busy=true;const m={r:'a',t:'',ai:1};S.chat.push(m);drawChat();
+try{const sample=await claude.use('sample');if(!sample)throw {code:'unavailable'};
+const h=[];S.chat.slice(0,-1).filter(x=>x.t&&!x.err).slice(-12).forEach(x=>{const r=x.r=='u'?'user':'assistant';if(h.length&&h[h.length-1].role==r)h[h.length-1].content+='\n'+x.t;else h.push({role:r,content:x.t})});
+while(h.length&&h[0].role!='user')h.shift();if($('#ai_share').checked)h[h.length-1].content+='\n\n'+summary();h[0].content=SYS+'\n\n'+h[0].content;
+const r=await sample(h,{cache:false,onText:({text})=>{m.t=text;drawChat()}});m.t=r.text+(r.truncated?'\n\n…(answer was cut off; ask me to continue)':'')}
+catch(e){m.err=1;const c=e&&e.code;m.t=c=='not_granted'?'Permission to use the AI was declined. Reload the page and allow it to use the AI assistant.':c=='rate_limited'?'Too many requests. Please wait a moment and try again.':'The AI service is unavailable right now. Please try again later.'}
+busy=false;S.chat=S.chat.slice(-40);save();drawChat()}
+resetForm();tabs();chatInit();render();profInit();greet();
+</script></body></html>
